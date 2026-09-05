@@ -1,6 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from app.services.pdf_extractor import extract_pdf_text
+from app.services.pdf_extractor import (
+    extract_pdf_pages,
+    extract_pdf_text,
+)
 
 
 router = APIRouter(prefix="/materials", tags=["Materials"])
@@ -16,9 +19,11 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     contents = await file.read()
 
-    text = extract_pdf_text(contents)
+    pages = extract_pdf_pages(contents)
+    full_text = extract_pdf_text(contents)
 
     return {
         "filename": file.filename,
-        "text": text,
+        "pages": pages,
+        "text": full_text,
     }

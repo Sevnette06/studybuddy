@@ -1,3 +1,11 @@
+"use client";
+
+import {
+  SkipBack,
+  Play,
+  SkipForward,
+} from "lucide-react";
+
 export default function AudioPage() {
   return (
     <main className="min-h-screen bg-[#FAFAFC] px-6 py-10 text-black">
@@ -39,16 +47,37 @@ export default function AudioPage() {
           {/* Controls */}
           <div className="mt-6 flex items-center justify-center gap-10">
 
-            <button className="text-3xl text-[#6C4DFF]">
-              ◀
+            {/* Previous */}
+            <button
+              className="text-[#6C4DFF] transition hover:scale-110"
+              aria-label="Previous section"
+            >
+              <SkipBack
+                className="h-7 w-7"
+                strokeWidth={1.8}
+              />
             </button>
 
-            <button className="flex h-14 w-14 items-center justify-center rounded-full bg-[#6C4DFF] text-2xl text-white">
-              ▶
+            {/* Play */}
+            <button
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-[#6C4DFF] text-white transition hover:scale-105"
+              aria-label="Play audio"
+            >
+              <Play
+                className="h-6 w-6 translate-x-[1px] fill-current"
+                strokeWidth={1.8}
+              />
             </button>
 
-            <button className="text-3xl text-[#6C4DFF]">
-              ▶
+            {/* Next */}
+            <button
+              className="text-[#6C4DFF] transition hover:scale-110"
+              aria-label="Next section"
+            >
+              <SkipForward
+                className="h-7 w-7"
+                strokeWidth={1.8}
+              />
             </button>
 
           </div>
@@ -57,28 +86,34 @@ export default function AudioPage() {
         {/* Chapters */}
         <div className="mt-14 space-y-3">
 
+          {/* Introduction */}
           <div className="flex items-center justify-between rounded-lg bg-[#F0ECFF] px-6 py-4">
             <span className="text-sm font-medium">
               Introduction
             </span>
+
             <span className="text-xs text-[#777777]">
               05:42
             </span>
           </div>
 
+          {/* Part 1 */}
           <div className="flex items-center justify-between rounded-lg bg-white px-6 py-4 shadow-sm">
             <span className="text-sm font-medium">
               Part 1
             </span>
+
             <span className="text-xs text-[#777777]">
               13:42
             </span>
           </div>
 
+          {/* Part 2 */}
           <div className="flex items-center justify-between rounded-lg bg-white px-6 py-4 shadow-sm">
             <span className="text-sm font-medium">
               Part 2
             </span>
+
             <span className="text-xs text-[#777777]">
               34:11
             </span>

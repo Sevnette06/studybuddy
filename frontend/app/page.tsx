@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AudioLines, FileText } from "lucide-react";
 
 export default function Home() {
   const [lectureFile, setLectureFile] = useState<File | null>(null);
@@ -45,7 +46,7 @@ export default function Home() {
             }`}
           >
             <div className="flex justify-center">
-              <span className="text-5xl text-[#6C4DFF]">♩</span>
+              <AudioLines className="h-12 w-12 text-[#6C4DFF]" strokeWidth={1.8} />
             </div>
 
             <h2 className="mt-5 font-semibold">
@@ -88,7 +89,7 @@ export default function Home() {
             }`}
           >
             <div className="flex justify-center">
-              <span className="text-5xl text-[#6C4DFF]">▱</span>
+              <FileText className="h-12 w-12 text-[#6C4DFF]" strokeWidth={1.8} />
             </div>
 
             <h2 className="mt-5 font-semibold">

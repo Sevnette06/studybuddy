@@ -1,3 +1,7 @@
+"use client";
+
+import { FileText } from "lucide-react";
+
 export default function TranscriptPage() {
   return (
     <main className="min-h-screen bg-[#FAFAFC] px-6 py-10 text-black">
@@ -26,24 +30,10 @@ export default function TranscriptPage() {
           <div className="flex h-[205px] w-[250px] flex-col items-center justify-center rounded-lg bg-[#F0F0F2]">
 
             {/* File icon */}
-            <svg
-              width="52"
-              height="62"
-              viewBox="0 0 52 62"
-              fill="none"
-              className="text-[#AAAAAA]"
-            >
-              <path
-                d="M7 2H31L45 16V60H7V2Z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <path
-                d="M31 2V17H45"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
+            <FileText
+              className="h-12 w-12 text-[#AAAAAA]"
+              strokeWidth={1.8}
+            />
 
             <p className="mt-3 text-xs text-[#888888]">
               Original Transcript
@@ -62,24 +52,10 @@ export default function TranscriptPage() {
           <div className="flex h-[205px] w-[250px] flex-col items-center justify-center rounded-lg bg-[#F0F0F2]">
 
             {/* File icon */}
-            <svg
-              width="52"
-              height="62"
-              viewBox="0 0 52 62"
-              fill="none"
-              className="text-[#AAAAAA]"
-            >
-              <path
-                d="M7 2H31L45 16V60H7V2Z"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <path
-                d="M31 2V17H45"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-            </svg>
+            <FileText
+              className="h-12 w-12 text-[#AAAAAA]"
+              strokeWidth={1.8}
+            />
 
             <p className="mt-3 text-xs text-[#888888]">
               Translated Transcript

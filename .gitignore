@@ -232,5 +232,8 @@ __pycache__/
 backend/tts_env/
 tts_env/
 
+backend/tts_env/
+backend/generated/
+backend/test_audio_lesson.wav
 
 V

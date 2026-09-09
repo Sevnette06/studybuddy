@@ -236,4 +236,7 @@ backend/tts_env/
 backend/generated/
 backend/test_audio_lesson.wav
 
+.DS_Store
+tts_env/
+
 V

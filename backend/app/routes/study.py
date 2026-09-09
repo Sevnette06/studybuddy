@@ -6,6 +6,18 @@ from fastapi import (
     HTTPException,
 )
 
+from pathlib import Path
+from fastapi.responses import FileResponse
+
+from app.services.tts_service import generate_audio_lesson
+from app.services.claude_service import (
+    clean_transcript,
+    translate_transcript,
+    align_transcript_to_slides,
+    generate_aligned_smart_notes,
+    generate_podcast_script,
+)
+from app.services.tts_service import generate_audio_lesson
 from app.services.transcription import transcribe_audio
 from app.services.pdf_extractor import extract_pdf_pages
 
@@ -131,7 +143,7 @@ async def process_study_pack(
     # 1. Whisper transcription
     # -------------------------
 
-    print("1/6 Transcribing lecture...")
+    print("1/8 Transcribing lecture...")
 
     raw_transcript = transcribe_audio(
         file_bytes=lecture_bytes,
@@ -142,7 +154,7 @@ async def process_study_pack(
     # 2. Clean transcript
     # -------------------------
 
-    print("2/6 Cleaning transcript...")
+    print("2/8 Cleaning transcript...")
 
     cleaned_transcript = clean_transcript(
         raw_transcript
@@ -152,7 +164,7 @@ async def process_study_pack(
     # 3. Translate transcript
     # -------------------------
 
-    print("3/6 Translating transcript...")
+    print("3/8 Translating transcript...")
 
     translation = translate_transcript(
         cleaned_transcript,
@@ -163,7 +175,7 @@ async def process_study_pack(
     # 4. Extract PDF pages
     # -------------------------
 
-    print("4/6 Reading slides...")
+    print("4/8 Reading slides...")
 
     pages = extract_pdf_pages(
         slide_bytes
@@ -173,7 +185,7 @@ async def process_study_pack(
     # 5. Align lecture + slides
     # -------------------------
 
-    print("5/6 Aligning transcript to slides...")
+    print("5/8 Aligning transcript to slides...")
 
     alignment = align_transcript_to_slides(
         transcript=cleaned_transcript,
@@ -184,11 +196,25 @@ async def process_study_pack(
     # 6. Generate Smart Notes
     # -------------------------
 
-    print("6/6 Generating Smart Notes...")
+    print("6/8 Generating Smart Notes...")
 
     notes = generate_aligned_smart_notes(
         pages=pages,
         alignment=alignment,
+    )
+
+    print("7/8 Generating podcast script...")
+
+    podcast_script = generate_podcast_script(
+        smart_notes=notes,
+        target_language=target_language,
+    )
+
+    print("8/8 Generating audio lesson...")
+
+    audio_path = generate_audio_lesson(
+        script=podcast_script,
+        filename="audio_lesson.wav",
     )
 
     print("StudyPack complete!")
@@ -205,8 +231,66 @@ async def process_study_pack(
         },
 
         "slides": pages,
-
         "alignment": alignment,
-
         "smart_notes": notes,
+
+        "audio_lesson": {
+            "script": podcast_script,
+            "file_path": audio_path,
+        },
     }
+    
+class PodcastRequest(BaseModel):
+    smart_notes: list[dict]
+    target_language: str = "English"
+
+
+@router.post("/podcast-script")
+async def create_podcast_script(
+    request: PodcastRequest
+):
+    script = generate_podcast_script(
+        smart_notes=request.smart_notes,
+        target_language=request.target_language,
+    )
+
+    return {
+        "podcast_script": script
+    }
+    
+class AudioLessonRequest(BaseModel):
+    podcast_script: str
+    
+@router.post("/audio-lesson")
+async def create_audio_lesson(
+    request: AudioLessonRequest,
+):
+    output_path = generate_audio_lesson(
+        script=request.podcast_script
+    )
+
+    return FileResponse(
+        output_path,
+        media_type="audio/wav",
+        filename="audio_lesson.wav",
+    )
+    
+@router.get("/audio-lesson/file")
+async def get_audio_lesson():
+    audio_path = (
+        Path(__file__).resolve().parents[2]
+        / "generated"
+        / "audio_lesson.wav"
+    )
+
+    if not audio_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Audio lesson not found.",
+        )
+
+    return FileResponse(
+        path=str(audio_path),
+        media_type="audio/wav",
+        filename="audio_lesson.wav",
+    )

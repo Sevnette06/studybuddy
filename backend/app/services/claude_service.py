@@ -358,3 +358,52 @@ PROFESSOR ADDITIONS:
         notes.append(json.loads(text))
 
     return notes
+
+def generate_podcast_script(
+    smart_notes: list[dict],
+    target_language: str = "English",
+) -> str:
+
+    notes_json = json.dumps(
+        smart_notes,
+        ensure_ascii=False,
+        indent=2,
+    )
+
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=5000,
+        messages=[
+            {
+                "role": "user",
+                "content": f"""
+You are creating a short educational audio lesson based on university lecture notes.
+
+Write the script in {target_language}.
+
+Goals:
+- Make it sound natural when spoken aloud.
+- Explain concepts clearly rather than reading bullet points.
+- Preserve the meaning of the lecture.
+- Use important examples from the professor when helpful.
+- Prioritize the most important concepts.
+- Avoid irrelevant classroom chatter.
+- Do not invent new academic information.
+- Do not mention slide numbers unless necessary.
+- Use smooth transitions between topics.
+- Aim for an engaging study-review style.
+- Do NOT use markdown headings or bullet points.
+- Return ONLY the spoken script.
+
+SMART NOTES:
+{notes_json}
+""",
+            }
+        ],
+    )
+
+    return "".join(
+        block.text
+        for block in response.content
+        if block.type == "text"
+    ).strip()

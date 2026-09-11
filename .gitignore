@@ -217,26 +217,20 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Environment variables
-.env
+# StudyBuddy local / generated files
 
-# Python virtual environments
-.venv/
+# Environment variables
+backend/.env
+
+# Virtual environments
 backend/.venv/
 backend/app/.venv/
-
-# Python cache
-__pycache__/
-*.pyc
-
 backend/tts_env/
 tts_env/
 
-backend/tts_env/
+# Generated output
 backend/generated/
 backend/test_audio_lesson.wav
 
+# macOS
 .DS_Store
-tts_env/
-
-V

@@ -219,3 +219,5 @@ __marimo__/
 
 .DS_Store
 tts_env/backend/generated/*.wav
+tts_env/
+backend/generated/

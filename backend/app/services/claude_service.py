@@ -272,6 +272,7 @@ def chunk_text(text: str, max_chars: int = 6000) -> list[str]:
 def generate_aligned_smart_notes(
     pages: list[dict],
     alignment: list[dict],
+    target_language: str = "English",
 ) -> list[dict]:
 
     slide_lookup = {
@@ -284,16 +285,64 @@ def generate_aligned_smart_notes(
     for item in alignment:
         page_number = item["page_number"]
 
-        # Skip slides with no meaningful lecture match
-        if not item.get("matched", False):
+        slide_text = slide_lookup.get(
+            page_number,
+            "",
+        ).strip()
+
+        # Skip completely empty slides.
+        if not slide_text:
             continue
 
-        slide_text = slide_lookup.get(page_number, "")
+        matched = item.get(
+            "matched",
+            False,
+        )
+
+        if matched:
+            professor_explanation = item.get(
+                "professor_explanation",
+                "",
+            )
+
+            professor_additions = item.get(
+                "professor_additions",
+                [],
+            )
+
+        else:
+            # No reliable lecture match.
+            # Generate notes from slide content only.
+            professor_explanation = ""
+            professor_additions = []
 
         prompt = f"""
 You are creating StudyBuddy smart notes for ONE university lecture slide.
 
+TARGET LANGUAGE:
+{target_language}
+
+LANGUAGE RULES:
+
+- Write ALL student-facing Smart Notes content in {target_language}.
+- This includes:
+  - slide_title
+  - summary
+  - key_points
+  - professor_explanation
+  - key_takeaway
+- Translate the meaning of the source material naturally and accurately.
+- Even if the slide or professor speaks in another language,
+  the final Smart Notes MUST be written in {target_language}.
+- Preserve technical terminology accurately.
+- Do NOT translate or alter formulas, equations, mathematical symbols,
+  variable names, code, function names, or other notation when doing so
+  would change their technical meaning.
+- You may keep a technical term in its original form when necessary,
+  but explain it in {target_language} where appropriate.
+
 IMPORTANT SOURCE RULES:
+
 - The SLIDE is the authority for formulas, equations, tables,
   definitions, symbols, and printed facts.
 - The PROFESSOR EXPLANATION is the authority for spoken
@@ -301,36 +350,54 @@ IMPORTANT SOURCE RULES:
 - If the transcript conflicts with the slide on a formula,
   table value, or symbol, ALWAYS follow the slide.
 - Do NOT invent information.
+- Do NOT add outside knowledge.
 - Do NOT correct or complete missing slide content using outside knowledge.
 - Ignore irrelevant classroom chatter, jokes, temperature comments,
   attendance comments, and unrelated conversation.
 - Keep only educationally useful professor additions.
+- If no professor explanation is provided, create the notes using
+  ONLY the slide content.
+- If no professor explanation is provided, return an EMPTY ARRAY
+  for "professor_explanation".
+- Do NOT pretend the professor said something that only appears
+  on the slide.
+- Do NOT turn observations into study instructions.
+- For example, "frequently used" does NOT mean "memorize this"
+  unless the professor or slide explicitly says so.
 
-Return ONLY valid JSON in exactly this structure:
+Return ONLY valid JSON.
+
+Return exactly this structure:
 
 {{
-  "page_number": {page_number},
-  "slide_title": "{item.get("slide_title", "")}",
-  "summary": "A concise explanation of what this slide teaches.",
-  "key_points": [
-    "important point"
-  ],
-  "professor_explanation": [
-    "useful explanation given verbally"
-  ],
-  "key_takeaway": "The single most important thing a student should remember."
+    "page_number": {page_number},
+    "slide_title": "Translate or naturally render the slide title in {target_language}",
+    "summary": "A concise explanation of what this slide teaches, written in {target_language}.",
+    "key_points": [
+        "Important point written in {target_language}"
+    ],
+    "professor_explanation": [
+        "Useful professor explanation translated into {target_language}"
+    ],
+    "key_takeaway": "The single most important thing the student should remember, written in {target_language}."
 }}
+
+ORIGINAL SLIDE TITLE:
+{item.get("slide_title", "")}
 
 SLIDE CONTENT:
 {slide_text}
 
+WAS THIS SLIDE MATCHED TO THE LECTURE?
+{matched}
+
 PROFESSOR EXPLANATION:
-{item.get("professor_explanation", "")}
+{professor_explanation}
 
 PROFESSOR ADDITIONS:
 {json.dumps(
-    item.get("professor_additions", []),
-    ensure_ascii=False
+    professor_additions,
+    ensure_ascii=False,
 )}
 """
 
@@ -351,11 +418,20 @@ PROFESSOR ADDITIONS:
             if block.type == "text"
         ).strip()
 
+        # Remove Markdown code fences if Claude adds them.
         if text.startswith("```"):
             text = text.split("\n", 1)[1]
             text = text.rsplit("```", 1)[0]
 
-        notes.append(json.loads(text))
+        note = json.loads(text)
+
+        # Safety:
+        # unmatched slides must never contain invented
+        # professor comments.
+        if not matched:
+            note["professor_explanation"] = []
+
+        notes.append(note)
 
     return notes
 
@@ -407,3 +483,72 @@ SMART NOTES:
         for block in response.content
         if block.type == "text"
     ).strip()
+    
+def generate_quiz(
+    smart_notes: list[dict],
+    number_of_questions: int = 5,
+) -> list[dict]:
+
+    prompt = f"""
+You are creating a StudyBuddy quiz from university lecture notes.
+
+Create exactly {number_of_questions} multiple-choice questions.
+
+RULES:
+- Use ONLY the information contained in the provided smart notes.
+- Do NOT invent outside information.
+- Questions should test understanding, not trivial wording.
+- Each question must have exactly 4 answer choices.
+- Exactly one answer must be correct.
+- Include a short explanation of why the correct answer is correct.
+- Keep questions clear and suitable for a university student.
+
+Return ONLY valid JSON in exactly this format:
+
+[
+  {{
+    "question": "Question text",
+    "options": [
+      "Option A",
+      "Option B",
+      "Option C",
+      "Option D"
+    ],
+    "correct_answer": 0,
+    "explanation": "Short explanation"
+  }}
+]
+
+IMPORTANT:
+"correct_answer" must be the zero-based index of the correct option:
+0 = first option
+1 = second option
+2 = third option
+3 = fourth option
+
+SMART NOTES:
+{json.dumps(smart_notes, ensure_ascii=False)}
+"""
+
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=3000,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+    )
+
+    text = "".join(
+        block.text
+        for block in response.content
+        if block.type == "text"
+    ).strip()
+
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1]
+        text = text.rsplit("```", 1)[0]
+
+    return json.loads(text)

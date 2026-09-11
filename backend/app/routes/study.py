@@ -15,6 +15,7 @@ from app.services.claude_service import (
     translate_transcript,
     align_transcript_to_slides,
     generate_aligned_smart_notes,
+    generate_quiz,
     generate_podcast_script,
 )
 from app.services.tts_service import generate_audio_lesson
@@ -65,6 +66,7 @@ class AlignmentItem(BaseModel):
 class AlignedNotesRequest(BaseModel):
     pages: list[SlidePage]
     alignment: list[AlignmentItem]
+    target_language: str = "English"
 
 
 @router.post("/smart-notes")
@@ -104,6 +106,7 @@ async def create_aligned_notes(
             item.model_dump()
             for item in request.alignment
         ],
+        target_language=request.target_language,
     )
 
     return {
@@ -143,7 +146,7 @@ async def process_study_pack(
     # 1. Whisper transcription
     # -------------------------
 
-    print("1/8 Transcribing lecture...")
+    print("1/9 Transcribing lecture...")
 
     raw_transcript = transcribe_audio(
         file_bytes=lecture_bytes,
@@ -154,7 +157,7 @@ async def process_study_pack(
     # 2. Clean transcript
     # -------------------------
 
-    print("2/8 Cleaning transcript...")
+    print("2/9 Cleaning transcript...")
 
     cleaned_transcript = clean_transcript(
         raw_transcript
@@ -164,7 +167,7 @@ async def process_study_pack(
     # 3. Translate transcript
     # -------------------------
 
-    print("3/8 Translating transcript...")
+    print("3/9 Translating transcript...")
 
     translation = translate_transcript(
         cleaned_transcript,
@@ -175,7 +178,7 @@ async def process_study_pack(
     # 4. Extract PDF pages
     # -------------------------
 
-    print("4/8 Reading slides...")
+    print("4/9 Reading slides...")
 
     pages = extract_pdf_pages(
         slide_bytes
@@ -185,7 +188,7 @@ async def process_study_pack(
     # 5. Align lecture + slides
     # -------------------------
 
-    print("5/8 Aligning transcript to slides...")
+    print("5/9 Aligning transcript to slides...")
 
     alignment = align_transcript_to_slides(
         transcript=cleaned_transcript,
@@ -196,21 +199,30 @@ async def process_study_pack(
     # 6. Generate Smart Notes
     # -------------------------
 
-    print("6/8 Generating Smart Notes...")
+    print("6/9 Generating Smart Notes...")
 
     notes = generate_aligned_smart_notes(
         pages=pages,
         alignment=alignment,
+        target_language=target_language,
+    )
+    
+    
+    print("7/9 Generating quiz...")
+
+    quiz = generate_quiz(
+        smart_notes=notes,
+        number_of_questions=5,
     )
 
-    print("7/8 Generating podcast script...")
+    print("8/9 Generating podcast script...")
 
     podcast_script = generate_podcast_script(
         smart_notes=notes,
         target_language=target_language,
     )
 
-    print("8/8 Generating audio lesson...")
+    print("9/9 Generating audio lesson...")
 
     audio_path = generate_audio_lesson(
         script=podcast_script,
@@ -220,6 +232,7 @@ async def process_study_pack(
     print("StudyPack complete!")
 
     return {
+        
         "lecture_filename": lecture.filename,
         "slides_filename": slides.filename,
         "target_language": target_language,
@@ -233,6 +246,8 @@ async def process_study_pack(
         "slides": pages,
         "alignment": alignment,
         "smart_notes": notes,
+        
+        "quiz": quiz,
 
         "audio_lesson": {
             "script": podcast_script,

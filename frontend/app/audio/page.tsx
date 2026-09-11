@@ -1,12 +1,54 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Headphones } from "lucide-react";
+
 import {
-  SkipBack,
-  Play,
-  SkipForward,
-} from "lucide-react";
+  studyStore,
+  restoreStudyPack,
+  StudyPackResult,
+} from "@/lib/studyStore";
 
 export default function AudioPage() {
+  const [result, setResult] = useState<StudyPackResult | null>(
+    studyStore.result
+  );
+
+  useEffect(() => {
+    restoreStudyPack();
+    setResult(studyStore.result);
+  }, []);
+
+  if (!result) {
+    return (
+      <main className="min-h-screen bg-[#FAFAFC] px-6 py-10 text-black">
+        <div className="mx-auto max-w-4xl">
+          <h1 className="text-4xl font-bold">
+            Study<span className="text-[#6C4DFF]">Buddy</span>
+          </h1>
+
+          <div className="mt-16 text-center">
+            <h2 className="text-2xl font-bold">
+              No StudyPack found
+            </h2>
+
+            <p className="mt-3 text-sm text-[#666666]">
+              Please process a lecture first.
+            </p>
+
+            <Link
+              href="/"
+              className="mt-6 inline-flex rounded-md bg-[#6C4DFF] px-5 py-3 text-sm font-semibold text-white"
+            >
+              Go to Upload
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#FAFAFC] px-6 py-10 text-black">
       <div className="mx-auto max-w-4xl">
@@ -28,107 +70,68 @@ export default function AudioPage() {
         </h2>
 
         <p className="mt-2 text-sm text-[#666666]">
-          Listen to your translated lecture in an easy way.
+          Listen to your AI-generated lesson in {result.target_language}.
         </p>
 
-        {/* Audio player */}
-        <div className="mt-16">
+        {/* Audio Lesson Card */}
+        <div className="mt-12 rounded-xl border border-[#E5E5E5] bg-white p-8 shadow-sm">
 
-          {/* Progress bar */}
-          <div className="h-2 w-full rounded-full bg-[#E5E5E8]">
-            <div className="h-2 w-[25%] rounded-full bg-[#6C4DFF]" />
-          </div>
-
-          <div className="mt-2 flex justify-between text-xs text-[#888888]">
-            <span>05:42</span>
-            <span>40:15</span>
-          </div>
-
-          {/* Controls */}
-          <div className="mt-6 flex items-center justify-center gap-10">
-
-            {/* Previous */}
-            <button
-              className="text-[#6C4DFF] transition hover:scale-110"
-              aria-label="Previous section"
-            >
-              <SkipBack
-                className="h-7 w-7"
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F0ECFF]">
+              <Headphones
+                className="h-7 w-7 text-[#6C4DFF]"
                 strokeWidth={1.8}
               />
-            </button>
+            </div>
 
-            {/* Play */}
-            <button
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-[#6C4DFF] text-white transition hover:scale-105"
-              aria-label="Play audio"
-            >
-              <Play
-                className="h-6 w-6 translate-x-[1px] fill-current"
-                strokeWidth={1.8}
-              />
-            </button>
+            <div>
+              <h3 className="font-bold">
+                Your StudyBuddy Audio Lesson
+              </h3>
 
-            {/* Next */}
-            <button
-              className="text-[#6C4DFF] transition hover:scale-110"
-              aria-label="Next section"
-            >
-              <SkipForward
-                className="h-7 w-7"
-                strokeWidth={1.8}
-              />
-            </button>
-
+              <p className="mt-1 text-xs text-[#777777]">
+                Generated from your lecture and study notes
+              </p>
+            </div>
           </div>
+
+          {/* REAL Kokoro Audio */}
+          <audio
+            className="mt-8 w-full"
+            controls
+            preload="metadata"
+            src="http://127.0.0.1:8000/study/audio-lesson/file"
+          >
+            Your browser does not support audio playback.
+          </audio>
+
         </div>
 
-        {/* Chapters */}
-        <div className="mt-14 space-y-3">
+        {/* Podcast Script */}
+        <div className="mt-8 rounded-xl border border-[#E5E5E5] bg-white p-8 shadow-sm">
+          <h3 className="font-bold">
+            Audio Lesson Script
+          </h3>
 
-          {/* Introduction */}
-          <div className="flex items-center justify-between rounded-lg bg-[#F0ECFF] px-6 py-4">
-            <span className="text-sm font-medium">
-              Introduction
-            </span>
+          <p className="mt-2 text-xs text-[#777777]">
+            The AI-generated script used to create your audio lesson.
+          </p>
 
-            <span className="text-xs text-[#777777]">
-              05:42
-            </span>
+          <div className="mt-5 max-h-[350px] overflow-y-auto rounded-lg bg-[#FAFAFC] p-5">
+            <p className="whitespace-pre-wrap text-sm leading-7 text-[#555555]">
+              {result.audio_lesson.script}
+            </p>
           </div>
-
-          {/* Part 1 */}
-          <div className="flex items-center justify-between rounded-lg bg-white px-6 py-4 shadow-sm">
-            <span className="text-sm font-medium">
-              Part 1
-            </span>
-
-            <span className="text-xs text-[#777777]">
-              13:42
-            </span>
-          </div>
-
-          {/* Part 2 */}
-          <div className="flex items-center justify-between rounded-lg bg-white px-6 py-4 shadow-sm">
-            <span className="text-sm font-medium">
-              Part 2
-            </span>
-
-            <span className="text-xs text-[#777777]">
-              34:11
-            </span>
-          </div>
-
         </div>
 
         {/* Back */}
         <div className="mt-8">
-          <a
+          <Link
             href="/studypack"
             className="text-sm font-semibold text-[#6C4DFF] hover:underline"
           >
             ← Back to StudyPack
-          </a>
+          </Link>
         </div>
 
       </div>

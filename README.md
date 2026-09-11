@@ -1,28 +1,50 @@
+<div align="center">
+
 # StudyBuddy
+
+### From lecture to learning, all in one place.
 
 **Making Learning an Experience and Not a Hassle**
 
-StudyBuddy is an AI-powered study platform built for international university students who attend lectures in a language that is not their native language.
+<br>
 
-The idea came from a common problem: students often need several different tools just to understand one lecture. They may need to record it, transcribe it, translate it, compare it with lecture slides, rewrite it into notes, create revision questions, and sometimes turn those notes into audio.
+Built by **Neil Iman Armani** and **Adriana Wafa**  
 
-StudyBuddy brings that entire process into one place.
+<br>
+
+`AI-Powered` · `Multilingual` · `Lecture Transcription` · `Smart Notes` · `Quiz Generation` · `Audio Learning`
+
+</div>
+
+---
+
+## About StudyBuddy
+
+Studying in a language that is not your own can make even a single lecture feel like twice the work.
+
+You record the lecture. Then you transcribe it. Then translate it. Then go through the slides. Then try to figure out which parts of the professor's explanation belong to which slide. After that, you still have to make notes and actually study.
+
+We built **StudyBuddy** to bring that whole process into one place.
+
+Upload a lecture recording and its matching slides, choose the language you want to study in, and StudyBuddy turns them into a complete **StudyPack**.
+
+> **Less time preparing to learn. More time actually learning.**
+
+---
 
 ## What StudyBuddy Does
 
-Students upload a lecture recording and the matching lecture slides, choose the language they want to study in, and StudyBuddy creates a complete StudyPack.
+A StudyPack brings together everything a student needs to review a lecture:
 
-A StudyPack can include:
-
-- A cleaned lecture transcript
-- A translated transcript
-- Smart Notes based on both the lecture and the slides
-- Professor explanations and key takeaways
-- An AI-generated quiz
-- A podcast-style study script
-- An audio lesson
-
-The goal is simple: help students spend less time preparing their materials and more time actually learning.
+| Feature | What it does |
+| --- | --- |
+| **Lecture Transcript** | Converts a recorded lecture into readable text |
+| **Translation** | Translates the lecture into the student's preferred language |
+| **Smart Notes** | Combines slide content with the professor's explanations |
+| **Key Takeaways** | Pulls out the most important points from each section |
+| **AI Quiz** | Creates multiple-choice questions for revision |
+| **Audio Lesson** | Turns study material into a podcast-style lesson |
+| **Downloads** | Lets students save their original and translated transcripts |
 
 ---
 
@@ -30,127 +52,155 @@ The goal is simple: help students spend less time preparing their materials and 
 
 ### Lecture Transcription
 
-StudyBuddy uses OpenAI Whisper to transcribe uploaded lecture recordings.
+StudyBuddy uses **OpenAI Whisper** to transcribe uploaded lecture recordings.
 
-Supported formats include:
+Supported formats:
 
-- MP3
-- MP4
-- WAV
-- M4A
+`MP3` · `MP4` · `WAV` · `M4A`
+
+---
 
 ### Translation
 
 The lecture transcript can be translated into the student's preferred learning language.
 
-The current interface includes:
+The current interface supports:
 
 - English
 - Korean
 - Malay
 
-The system can be extended to support more languages later.
+The system is designed so more languages can be added later.
+
+---
 
 ### Slide Processing
 
-StudyBuddy extracts text from uploaded PDF lecture slides using PyMuPDF.
+StudyBuddy reads uploaded PDF lecture slides using **PyMuPDF**.
 
-The slides are processed page by page so the system can connect the lecture with the correct material.
+Instead of treating the entire presentation as one large document, the slides are processed page by page. This gives StudyBuddy the structure it needs to connect what the professor says with the relevant slide.
+
+---
 
 ### Lecture and Slide Alignment
 
-The system compares the professor's explanation with the lecture slides.
+One of the main parts of StudyBuddy is connecting the spoken lecture with the presentation.
 
-This helps separate:
+The system separates:
 
-- Information written directly on the slide
-- Explanations spoken by the professor
-- Extra examples
-- Important additions
-- Teaching advice
+- Information written directly on the slides
+- Explanations given verbally by the professor
+- Additional examples
+- Important professor additions
+- Teaching advice and context
+
+This allows the generated notes to reflect both the official lecture material and what was actually explained in class.
+
+---
 
 ### Smart Notes
 
-StudyBuddy generates structured notes for each lecture slide.
+StudyBuddy creates structured notes for each relevant lecture slide.
 
-Each note can include:
+Each note can contain:
 
-- Slide title
-- Summary
-- Key points
-- Professor explanation
-- Key takeaway
+- **Slide title**
+- **Summary**
+- **Key points**
+- **Professor explanation**
+- **Key takeaway**
 
-The slides remain the source of truth for formulas, definitions, equations, tables, and other printed information.
+The slides remain the source of truth for formulas, equations, definitions, tables, symbols, and other printed information.
 
-The professor's lecture is used for explanations and additional context.
+The professor's lecture is used to add explanations and context without replacing the original material.
 
-Smart Notes are generated in the language selected by the student.
+Smart Notes are also generated in the student's selected learning language.
+
+---
 
 ### Quiz Generation
 
-StudyBuddy creates multiple-choice revision questions based on the generated Smart Notes.
+Once the Smart Notes are ready, StudyBuddy creates a multiple-choice quiz based on the lecture material.
 
-Each question includes:
+Each question contains:
 
 - Four answer choices
 - One correct answer
 - An explanation
 - Score tracking
 
+This gives students a quick way to check whether they actually understood what they studied.
+
+---
+
 ### Audio Lesson
 
-StudyBuddy can turn the study material into a podcast-style lesson.
+Some students learn better by listening.
 
-Claude generates the study script, and Kokoro MLX converts it into speech.
+StudyBuddy uses the generated study material to create a podcast-style lesson. **Claude** prepares the study script, and **Kokoro MLX** turns it into natural-sounding speech.
 
-This allows students to review the lecture by listening instead of only reading.
+This makes it possible to review a lecture while walking, commuting, or doing something away from the screen.
+
+---
 
 ### Downloadable Transcripts
 
-Students can download both:
+Students can download both versions of their transcript:
 
-- The cleaned original transcript
-- The translated transcript
+- Cleaned original transcript
+- Translated transcript
+
+This makes the generated material useful outside StudyBuddy as well.
 
 ---
 
 ## How It Works
 
 ```text
-Lecture Recording
-      |
-      v
-OpenAI Whisper
-      |
-      v
-Raw Transcript
-      |
-      v
-Claude
-      |
-      +--> Transcript Cleanup
-      |
-      +--> Translation
-      |
-      v
-Lecture Slides
-      |
-      v
-PDF Text Extraction
-      |
-      v
-Lecture + Slide Alignment
-      |
-      v
-Smart Notes
-      |
-      +--> Quiz Generation
-      |
-      +--> Podcast Script
-              |
-              v
-          Kokoro MLX
-              |
-              v
-          Audio Lesson
+Lecture Recording                 Lecture Slides
+       |                                |
+       v                                v
+ OpenAI Whisper                  PDF Text Extraction
+       |                                |
+       v                                |
+ Raw Transcript                         |
+       |                                |
+       v                                |
+     Claude                             |
+       |                                |
+       +---- Transcript Cleanup         |
+       |                                |
+       +---- Translation                |
+       |                                |
+       +----------------+---------------+
+                        |
+                        v
+             Lecture + Slide Alignment
+                        |
+                        v
+                   Smart Notes
+                    /       \
+                   /         \
+                  v           v
+          Quiz Generation   Podcast Script
+                                  |
+                                  v
+                              Kokoro MLX
+                                  |
+                                  v
+                             Audio Lesson
+```
+
+---
+
+## The Goal
+
+StudyBuddy is not meant to replace studying.
+
+It is meant to remove the repetitive work that happens **before** studying.
+
+For international students especially, understanding the lecture should be the challenge — not spending hours moving the same content between transcription, translation, note-taking, and audio tools.
+
+**StudyBuddy turns lecture preparation into one workflow, so students can focus on learning.**
+
+---
